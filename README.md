@@ -10,4 +10,7 @@
  * Servlet Containers : In Java Web Apps, Servlet Container(Web Server) takes care of translating the HTTP messages for Java code to understand. Most popular is Tomcat. Servlet container converts the HTTP messages into ServletRequest and hand over to Servlet method as a parameter. Similarly, for ServletResponse.
  * Role of Filters: Filters inside the Java Web Application can be used to intercept each req/resp and do some pre-work before our business logic.
 - Whenever an HTTP requests hit the Application Server, first it should hit the Filters then the Servlets or Application Business logic.
-* 
+* Usage of some important Spring Security Filters while hitting an Authenticated API are:
+  - AuthorizationFilter
+  - DefaultLoginPageGeneratingFilter
+  - UsernamePasswordAuthenticationFilter
