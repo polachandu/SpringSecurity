@@ -17,3 +17,8 @@
 - SecurityFilterChain Bean is where we configure the users to allow the secured APIs. In this bean, we are also segregate what are the secured APIs and public APIs by using requestMatchers and the authentication levels.
   - We can customise this bean to have form login(for UI) and basicHttp(if we just need it for backend communication like API)
 - Usage of PasswordEncoder helps to not storing the plain-text password which is an industry standard. 
+
+
+
+## Open Questions:
+- Why did we choose UserDetailsService over UserDetailsManager?
