@@ -2,6 +2,7 @@ package org.learning.springsecurity.model;
 
 
 import jakarta.persistence.*;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -15,7 +16,7 @@ public class Customer {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
     private String email;
-    private String password;
+    private String pwd;
     @Column(name="role")
     private String role;
 }

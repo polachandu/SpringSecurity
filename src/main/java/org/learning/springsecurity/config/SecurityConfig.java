@@ -23,19 +23,19 @@ public class SecurityConfig {
 //        http.authorizeHttpRequests((requests) -> requests.anyRequest().permitAll());
 //        http.authorizeHttpRequests((requests) -> requests.anyRequest().denyAll());
         http.authorizeHttpRequests((requests) -> requests.requestMatchers("/myAccount","/myBalance","/myLoans","/myCards").authenticated()
-                .requestMatchers("/notices","/contact","/error").permitAll());
+                .requestMatchers("/notices","/contact","/error","/register").permitAll());
         http.formLogin(withDefaults());
         http.httpBasic(withDefaults());
         return http.build();
     }
 
 
-    @Bean
-    public UserDetailsService userDetailsService(DataSource dataSource){
+//    @Bean
+//    public UserDetailsService userDetailsService(DataSource dataSource){
 //        UserDetails user = User.withUsername("user").password("{noop}Userhasgreatpassword").authorities("read").build();
 //        UserDetails admin = User.withUsername("admin").password("{bcrypt}$2a$12$fBZR74VLG35dzn7AAgDz9ugXfXD4/Pvz0j24BuVt87QJ52.VlADje").authorities("admin").build();
-        return new JdbcUserDetailsManager(dataSource);
-    }
+//        return new JdbcUserDetailsManager(dataSource);
+//    }
 
     @Bean
     public PasswordEncoder passwordEncoder(){
