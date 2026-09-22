@@ -17,7 +17,16 @@
 - SecurityFilterChain Bean is where we configure the users to allow the secured APIs. In this bean, we are also segregate what are the secured APIs and public APIs by using requestMatchers and the authentication levels.
   - We can customise this bean to have form login(for UI) and basicHttp(if we just need it for backend communication like API)
 - Usage of PasswordEncoder helps to not storing the plain-text password which is an industry standard. 
-
+- To maintain industry standard, we always follows hashing technique. We cannot perform Encoding or Encryption on Passwords.
+- Encoding can be decoded easily because it is reversible. Ex: Base 64, ASCII encoding. We should use Encoding when data is not in BINARY format.
+- Encryption can also be decrypted using a key. We use encryption for when DATA AT REST or DATA IN TRANSIT like files stored in S3. Encryption has two types, Symmetric and Asymmetric. Ex: RSA
+- We should use Hashing while storing passwords and it is irreversible. Hashing also has drawbacks 
+  1. Every type same hashing value will be generated for the same string.
+  2. Generating the hash value is faster. This will be an advantage for hackers to perform hash using multiple values with in small amount of time.
+- Considering the above drawbacks, hackers can perform brute-force attacks and dictionary or rainbow attacks.
+- To overcome these attacks, we should use salts during password hashing. The advantage of using salt here is it will generate a random value every time. So even for same passwords for different users will be having different passwords. In database, it will store it as hash(salt+password)
+- 
+- 
 
 
 ## Open Questions:

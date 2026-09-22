@@ -23,7 +23,8 @@ public class SecurityConfig {
 //        http.authorizeHttpRequests((requests) -> requests.anyRequest().permitAll());
 //        http.authorizeHttpRequests((requests) -> requests.anyRequest().denyAll());
         http.authorizeHttpRequests((requests) -> requests.requestMatchers("/myAccount","/myBalance","/myLoans","/myCards").authenticated()
-                .requestMatchers("/notices","/contact","/error","/register").permitAll());
+                .requestMatchers("/notices","/contact","/error","/register").permitAll())
+                .csrf(httpSecurityCsrfConfigurer -> httpSecurityCsrfConfigurer.disable());
         http.formLogin(withDefaults());
         http.httpBasic(withDefaults());
         return http.build();
