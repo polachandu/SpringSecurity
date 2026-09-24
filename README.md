@@ -25,7 +25,11 @@
   2. Generating the hash value is faster. This will be an advantage for hackers to perform hash using multiple values with in small amount of time.
 - Considering the above drawbacks, hackers can perform brute-force attacks and dictionary or rainbow attacks.
 - To overcome these attacks, we should use salts during password hashing. The advantage of using salt here is it will generate a random value every time. So even for same passwords for different users will be having different passwords. In database, it will store it as hash(salt+password)
-- 
+- formLogin will have default LoginAuthenticationEntryPoint by Spring Security. But for http Basic, we can create a new custom Authentication Entry Point to show how the response can be.
+- We can use Global Exception handle by creating new Custom Access Denied Handler.
+- 401 - Unauthorised
+- 403 - ForBidden
+- To redirect the page after session time out, we can configure that by using session Management in Config file and provide configuration as invalidSession and other configurations like maximum sessions for concurrent users.
 - 
 
 

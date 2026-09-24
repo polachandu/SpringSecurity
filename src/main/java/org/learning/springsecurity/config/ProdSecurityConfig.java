@@ -1,5 +1,7 @@
 package org.learning.springsecurity.config;
 
+import org.learning.springsecurity.exception.CustomAccessDeniedException;
+import org.learning.springsecurity.exception.CustomBasicAuthenticationEntryPoint;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
@@ -23,12 +25,15 @@ public class ProdSecurityConfig {
     SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http) {
 //        http.authorizeHttpRequests((requests) -> requests.anyRequest().permitAll());
 //        http.authorizeHttpRequests((requests) -> requests.anyRequest().denyAll());
-        http.redirectToHttps((httpSecurityHttpsRedirectConfigurer) -> httpSecurityHttpsRedirectConfigurer.requestMatchers(AnyRequestMatcher.INSTANCE))
+        http.sessionManagement(smc->smc.invalidSessionUrl("/invalidSession").maximumSessions(1).maxSessionsPreventsLogin(true))
+                .redirectToHttps((httpSecurityHttpsRedirectConfigurer) -> httpSecurityHttpsRedirectConfigurer.requestMatchers(AnyRequestMatcher.INSTANCE))
                 .authorizeHttpRequests((requests) -> requests.requestMatchers("/myAccount","/myBalance","/myLoans","/myCards").authenticated()
-                .requestMatchers("/notices","/contact","/error","/register").permitAll())
+                .requestMatchers("/notices","/contact","/error","/register","/invalidSession").permitAll())
                 .csrf(httpSecurityCsrfConfigurer -> httpSecurityCsrfConfigurer.disable());
         http.formLogin(withDefaults());
-        http.httpBasic(withDefaults());
+        http.httpBasic(httpSecurityHttpBasicConfigurer -> httpSecurityHttpBasicConfigurer.authenticationEntryPoint(new CustomBasicAuthenticationEntryPoint()));
+        http.exceptionHandling(httpSecurityExceptionHandlingConfigurer -> httpSecurityExceptionHandlingConfigurer.accessDeniedHandler(new CustomAccessDeniedException()));
+
         return http.build();
     }
 
