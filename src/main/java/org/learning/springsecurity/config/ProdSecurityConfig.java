@@ -27,7 +27,7 @@ public class ProdSecurityConfig {
 //        http.authorizeHttpRequests((requests) -> requests.anyRequest().denyAll());
         http.sessionManagement(smc->smc.invalidSessionUrl("/invalidSession").maximumSessions(1).maxSessionsPreventsLogin(true))
                 .redirectToHttps((httpSecurityHttpsRedirectConfigurer) -> httpSecurityHttpsRedirectConfigurer.requestMatchers(AnyRequestMatcher.INSTANCE))
-                .authorizeHttpRequests((requests) -> requests.requestMatchers("/myAccount","/myBalance","/myLoans","/myCards").authenticated()
+                .authorizeHttpRequests((requests) -> requests.requestMatchers("/myAccount","/myBalance","/myLoans","/myCards","/user").authenticated()
                 .requestMatchers("/notices","/contact","/error","/register","/invalidSession").permitAll())
                 .csrf(httpSecurityCsrfConfigurer -> httpSecurityCsrfConfigurer.disable());
         http.formLogin(withDefaults());
