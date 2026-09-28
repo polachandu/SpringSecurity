@@ -27,11 +27,12 @@ public class BankUsernamePwdAuthenticationProvider implements AuthenticationProv
         String username = authentication.getName();
         String pwd = authentication.getCredentials().toString();
         UserDetails userDetails = bankAppUserDetailsService.loadUserByUsername(username);
-        if(passwordEncoder.matches(pwd, userDetails.getPassword())){
-            return new UsernamePasswordAuthenticationToken(username,pwd, userDetails.getAuthorities());
-        }else{
-            throw new BadCredentialsException("Invalid Password");
-        }
+//        if(passwordEncoder.matches(pwd, userDetails.getPassword())){
+//            return new UsernamePasswordAuthenticationToken(username,pwd, userDetails.getAuthorities());
+//        }else{
+//            throw new BadCredentialsException("Invalid Password");
+//        }
+        return new UsernamePasswordAuthenticationToken(username,pwd, userDetails.getAuthorities());
     }
 
     @Override

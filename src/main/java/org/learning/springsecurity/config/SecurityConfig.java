@@ -1,36 +1,28 @@
 package org.learning.springsecurity.config;
 
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import org.jspecify.annotations.Nullable;
 import org.learning.springsecurity.exception.CustomAccessDeniedException;
 import org.learning.springsecurity.exception.CustomBasicAuthenticationEntryPoint;
 import org.learning.springsecurity.filter.CsrfCookieFilter;
+import org.learning.springsecurity.filter.AuthoritiesLoggingAfterFilter;
+import org.learning.springsecurity.filter.RequestValidationBeforeFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.security.authentication.password.CompromisedPasswordChecker;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.provisioning.JdbcUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.password.HaveIBeenPwnedRestApiPasswordChecker;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
-import org.springframework.security.web.csrf.CsrfToken;
 import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler;
-import org.springframework.security.web.csrf.CsrfTokenRequestHandler;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 
-import javax.sql.DataSource;
-
-import java.util.Collection;
 import java.util.Collections;
-import java.util.function.Supplier;
 
 import static org.springframework.security.config.Customizer.withDefaults;
 
@@ -59,8 +51,19 @@ public class SecurityConfig {
                 .sessionManagement(smc->smc.sessionCreationPolicy(SessionCreationPolicy.ALWAYS)
                         .invalidSessionUrl("/invalidSession").maximumSessions(3).maxSessionsPreventsLogin(true))
                 .redirectToHttps(httpSecurityHttpsRedirectConfigurer -> httpSecurityHttpsRedirectConfigurer.disable())
-                .authorizeHttpRequests((requests) -> requests.requestMatchers("/myAccount","/myBalance","/myLoans","/myCards","/user").authenticated()
+                .authorizeHttpRequests((requests) -> requests
+//                        .requestMatchers("/myAccount").hasAuthority("VIEWACCOUNT")
+//                        .requestMatchers("/myBalance").hasAuthority("VIEWBALANCE")
+//                        .requestMatchers("/myLoans").hasAuthority("VIEWLOANS")
+//                        .requestMatchers("/myCards").hasAuthority("VIEWCARDS")
+                        .requestMatchers("/myAccount").hasRole("USER")
+                        .requestMatchers("/myBalance").hasAnyRole("USER","ADMIN")
+                        .requestMatchers("/myLoans").hasRole("USER")
+                        .requestMatchers("/myCards").hasRole("USER")
+                        .requestMatchers("/user").authenticated()
                 .requestMatchers("/notices","/contact","/error","/register","/invalidSession").permitAll())
+                .addFilterBefore(new RequestValidationBeforeFilter(), BasicAuthenticationFilter.class)
+                .addFilterAfter(new AuthoritiesLoggingAfterFilter(), BasicAuthenticationFilter.class)
                 .csrf(httpSecurityCsrfConfigurer -> httpSecurityCsrfConfigurer.csrfTokenRequestHandler(csrfTokenRequestAttributeHandler)
                         .ignoringRequestMatchers("/register","/contact","/notices")
                         .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()))

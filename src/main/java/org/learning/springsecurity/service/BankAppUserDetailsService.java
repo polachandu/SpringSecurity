@@ -1,6 +1,7 @@
 package org.learning.springsecurity.service;
 
 import lombok.RequiredArgsConstructor;
+import org.learning.springsecurity.model.Authority;
 import org.learning.springsecurity.model.Customer;
 import org.learning.springsecurity.repository.CustomerRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -24,7 +26,7 @@ public class BankAppUserDetailsService implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         Customer customer = customerRepository.findByEmail(username).orElseThrow(()->new UsernameNotFoundException("User details not found for the user: "+ username));
-        List<GrantedAuthority> authorities = List.of(new SimpleGrantedAuthority(customer.getRole()));
+        List<SimpleGrantedAuthority> authorities = customer.getAuthorities().stream().map(authority -> new SimpleGrantedAuthority(authority.getName())).collect(Collectors.toList());
         return new User(customer.getEmail(), customer.getPwd(), authorities);
     }
 }
