@@ -3,15 +3,17 @@ package org.learning.springsecurity.config;
 import jakarta.servlet.http.HttpServletRequest;
 import org.learning.springsecurity.exception.CustomAccessDeniedException;
 import org.learning.springsecurity.exception.CustomBasicAuthenticationEntryPoint;
-import org.learning.springsecurity.filter.CsrfCookieFilter;
-import org.learning.springsecurity.filter.AuthoritiesLoggingAfterFilter;
-import org.learning.springsecurity.filter.RequestValidationBeforeFilter;
+import org.learning.springsecurity.filter.*;
+import org.learning.springsecurity.service.BankAppUserDetailsService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.password.CompromisedPasswordChecker;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -22,6 +24,7 @@ import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 
+import java.util.Arrays;
 import java.util.Collections;
 
 import static org.springframework.security.config.Customizer.withDefaults;
@@ -43,13 +46,15 @@ public class SecurityConfig {
                         corsConfiguration.setAllowedMethods(Collections.singletonList("*"));
                         corsConfiguration.setAllowCredentials(true);
                         corsConfiguration.setAllowedHeaders(Collections.singletonList("*"));
+                        corsConfiguration.setExposedHeaders(Arrays.asList("Authorization"));
                         corsConfiguration.setMaxAge(3600L);
                         return corsConfiguration;
                     }
                 }))
-                .securityContext(contextConfig -> contextConfig.requireExplicitSave(false))
-                .sessionManagement(smc->smc.sessionCreationPolicy(SessionCreationPolicy.ALWAYS)
-                        .invalidSessionUrl("/invalidSession").maximumSessions(3).maxSessionsPreventsLogin(true))
+//              .securityContext(contextConfig -> contextConfig.requireExplicitSave(false)) This only requires when JESSION ID is required. Take a deep-dive into it.
+                .sessionManagement(smc->smc.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+//                        .invalidSessionUrl("/invalidSession").maximumSessions(3).maxSessionsPreventsLogin(true)
+                )
                 .redirectToHttps(httpSecurityHttpsRedirectConfigurer -> httpSecurityHttpsRedirectConfigurer.disable())
                 .authorizeHttpRequests((requests) -> requests
 //                        .requestMatchers("/myAccount").hasAuthority("VIEWACCOUNT")
@@ -61,11 +66,13 @@ public class SecurityConfig {
                         .requestMatchers("/myLoans").hasRole("USER")
                         .requestMatchers("/myCards").hasRole("USER")
                         .requestMatchers("/user").authenticated()
-                .requestMatchers("/notices","/contact","/error","/register","/invalidSession").permitAll())
+                .requestMatchers("/notices","/contact","/error","/register","/invalidSession","/apiLogin").permitAll())
                 .addFilterBefore(new RequestValidationBeforeFilter(), BasicAuthenticationFilter.class)
                 .addFilterAfter(new AuthoritiesLoggingAfterFilter(), BasicAuthenticationFilter.class)
+                .addFilterAfter(new JWTTokenGeneratotFilter(), BasicAuthenticationFilter.class)
+                .addFilterBefore(new JWTTokenValidationFilter(), BasicAuthenticationFilter.class)
                 .csrf(httpSecurityCsrfConfigurer -> httpSecurityCsrfConfigurer.csrfTokenRequestHandler(csrfTokenRequestAttributeHandler)
-                        .ignoringRequestMatchers("/register","/contact","/notices")
+                        .ignoringRequestMatchers("/register","/contact","/notices","/apiLogin")
                         .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()))
                 .addFilterAfter(new CsrfCookieFilter(), BasicAuthenticationFilter.class);
         http.formLogin(withDefaults());
@@ -90,5 +97,13 @@ public class SecurityConfig {
     @Bean
     public CompromisedPasswordChecker compromisedPasswordChecker(){
         return new HaveIBeenPwnedRestApiPasswordChecker();
+    }
+
+    @Bean
+    public AuthenticationManager authenticationManager(UserDetailsService userDetailsService, PasswordEncoder passwordEncoder){
+        BankUsernamePwdAuthenticationProvider bankUsernamePwdAuthenticationProvider = new BankUsernamePwdAuthenticationProvider((BankAppUserDetailsService) userDetailsService,passwordEncoder);
+        ProviderManager providerManager = new ProviderManager(bankUsernamePwdAuthenticationProvider);
+        providerManager.setEraseCredentialsAfterAuthentication(false);
+        return providerManager;
     }
 }
